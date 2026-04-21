@@ -55,7 +55,6 @@
         "veel succes": "powodzenia",
         "gefeliciteerd": "gratulacje",
         "welterusten": "dobranoc"
-
     },
     "objecten": {
         "huis": "dom",
@@ -67,17 +66,48 @@
         "raam": "okno",
         "computer": "komputer",
         "telefoon": "telefon",
-        "fiets": "rower",
-        "mens": "człowiek",
-        "kind": "dziecko",
-        "vriend": "przyjaciel",
-        "familie": "rodzina",
-        "werk": "praca",
-        "school": "szkoła",
-        "winkel": "sklep",
-        "restaurant": "restauracja"
+        "lamp": "lampa",
+        "bed": "łóżko",
+        "kast": "szafa",
+        "bank": "kanapa",
+        "tv": "telewizor",
+        "koelkast": "lodówka",
+        "oven": "piekarnik",
+        "wasmachine": "pralka",
+        "droger": "suszarka",
+        "stofzuiger": "odkurzacz"
     },
-    "Dieren": {
+    "ruimtes": {
+        "kamer": "pokój",
+        "keuken": "kuchnia",
+        "badkamer": "łazienka",
+        "woonkamer": "salon",
+        "slaapkamer": "sypialnia",
+        "tuin": "ogród",
+        "garage": "garaż",
+        "zolder": "strych",
+        "kelder": "piwnica",
+        "schuur": "szopa",
+        "balkon": "balkon",
+        "terras": "taras"
+    },
+    "vervoer": {
+        "auto": "samochód",
+        "fiets": "rower",
+        "bus": "autobus",
+        "trein": "pociąg",
+        "vliegtuig": "samolot",
+        "boot": "łódź",
+        "metro": "metro",
+        "tram": "tramwaj",
+        "motor": "motocykl",
+        "scooter": "skuter",
+        "taxi": "taksówka",
+        "vrachtwagen": "ciężarówka",
+        "brommer": "motorower",
+        "trekker": "ciągnik"
+    },
+    "dieren": {
         "hond": "pies",
         "kat": "kot",
         "vogel": "ptak",
@@ -112,7 +142,55 @@
         "rat": "szczur",
         "hamster": "chomik",
         "cavia": "świnka morska"
-
+    },
+    "locaties: in de natuur": {
+        "bos": "las",
+        "strand": "plaża",
+        "berg": "góra",
+        "rivier": "rzeka",
+        "meer": "jezioro",
+        "eiland": "wyspa",
+        "vallei": "dolina",
+        "woestijn": "pustynia",
+        "jungle": "dżungla",
+        "grot": "jaskinia",
+        "waterval": "wodospad",
+        "heuvel": "wzgórze",
+        "klif": "klif",
+        "vulkaan": "wulkan",
+        "gletsjer": "lodowiec",
+        "oase": "oaza",
+        "savanne": "sawanna"
+    },
+    "locaties: in stad of drop": {
+        "school": "szkoła",
+        "winkel": "sklep",
+        "restaurant": "restauracja",
+        "park": "park",
+        "straat": "ulica",
+        "plein": "plac",
+        "brug": "most",
+        "toren": "wieża",
+        "kerk": "kościół",
+        "bibliotheek": "biblioteka",
+        "museum": "muzeum",
+        "bioscoop": "kino",
+        "theater": "teatr",
+        "zwembad": "basen",
+        "sporthal": "hala sportowa",
+        "concertzaal": "sala koncertowa",
+        "schoolplein": "plac szkolny",
+        "speeltuin": "plac zabaw",
+        "supermarkt": "supermarket",
+        "apotheek": "apteka",
+        "ziekenhuis": "szpital",
+        "bank": "bank",
+        "postkantoor": "poczta",
+        "kantoor": "biuro",
+        "rijksweg": "autostrada",
+        "luchthaven": "lotnisko",
+        "station": "stacja",
+        "haven": "port"
     },
     "Kleuren": {
         "rood": "czerwony",
@@ -125,9 +203,20 @@
         "zwart": "czarny",
         "wit": "biały",
         "grijs": "szary",
-        "bruin": "brązowy"
+        "bruin": "brązowy",
+        "goud": "złoty",
+        "zilver": "srebrny",
+        "koper": "miedziany",
+        "brons": "brązowy",
+        "turquoise": "turkusowy",
+        "lila": "liliowy",
+        "magenta": "magenta",
+        "cyan": "cyjan",
+        "indigo": "indygo",
+        "violet": "fioletowy",
+        "beige": "beżowy"
     },
-    "Eten en drinken": {
+    "eten en drinken": {
         "brood": "chleb",
         "kaas": "ser",
         "melk": "mleko",
@@ -143,9 +232,33 @@
         "pasta": "makaron",
         "rijst": "ryż",
         "soep": "zupa",
-        "salade": "sałatka"
+        "salade": "sałatka",
+        "pizza": "pizza",
+        "hamburger": "hamburger",
+        "friet": "frytki",
+        "ijs": "lody",
+        "taart": "ciasto",
+        "koek": "ciastko",
+        "chocolade": "czekolada",
+        "snoep": "słodycze",
+        "noten": "orzechy",
+        "zout": "sól",
+        "peper": "pieprz",
+        "olie": "olej",
+        "azijn": "ocet",
+        "kruiden": "przyprawy",
+        "saus": "sos",
+        "mayonaise": "majonez",
+        "ketchup": "ketchup",
+        "mosterd": "musztarda",
+        "yoghurt": "jogurt",
+        "room": "śmietana",
+        "boter": "masło",
+        "margarine": "margaryna",
+        "jam": "dżem", 
+        "honing": "miód"
     },
-    "Lichaamsdelen": {
+    "lichaamsdelen": {
         "hoofd": "głowa",
         "haar": "włosy",
         "oog": "oko",
@@ -163,9 +276,55 @@
         "buik": "brzuch",
         "rug": "plecy",
         "been": "noga",
-        "voet": "stopa"
+        "voet": "stopa",
+        "teen": "palec u nogi",
+        "hart": "serce",
+        "long": "płuco",
+        "lever": "wątroba",
+        "nier": "nerka",
+        "maag": "żołądek",
+        "darm": "jelito",
+        "huid": "skóra",
+        "bot": "kość",
+        "spier": "mięsień",
+        "zenuw": "nerw",
+        "bloed": "krew",
+        "lymfe": "limfa",
+        "hormoon": "hormon",
+        "enzym": "enzym",
+        "cel": "komórka",
+        "weefsel": "tkanka",
+        "orgaan": "organ",
+        "systeem": "system",
+        "lichaam": "ciało"
     },
-    "Werkwoorden": {
+    "gevoelens": {
+        "geest": "duch",
+        "ziel": "dusza",
+        "emotie": "emocja",
+        "gedachte": "myśl",
+        "gevoel": "uczucie"
+    },
+    "zintuigen": {
+        "zien": "widzieć",
+        "horen": "słyszeć",
+        "ruiken": "wąchać",
+        "proeven": "smakować",
+        "voelen": "czuć",
+        "tasten": "dotykać",
+        "pijn": "ból",
+        "warmte": "ciepło",
+        "kou": "zimno",
+        "druk": "ciśnienie",
+        "trilling": "wibracja",
+        "zicht": "wzrok",
+        "gehoor": "słuch",
+        "reuk": "węch",
+        "smaak": "smak",
+        "tast": "dotyk",
+        "evenwicht": "równowaga"
+    },
+    "werkwoorden": {
         "zijn": "być",
         "hebben": "mieć",
         "gaan": "iść",
@@ -180,9 +339,30 @@
         "slapen": "spać",
         "lopen": "chodzić",
         "rennen": "biegać",
-        "zwemmen": "pływać"
+        "zwemmen": "pływać",
+        "vliegen": "latać",
+        "werken": "pracować",
+        "studeren": "studiować",
+        "spelen": "grać",
+        "leren": "uczyć się",
+        "onderwijzen": "nauczać",
+        "helpen": "pomagać",
+        "kopen": "kupować",
+        "verkopen": "sprzedawać",
+        "geven": "dawać",
+        "nemen": "brać",
+        "maken": "robić",
+        "doen": "robić",
+        "zeggen": "mówić",
+        "vragen": "pytać",
+        "antwoorden": "odpowiadać",
+        "denken": "myśleć",
+        "geloven": "wierzyć",
+        "weten": "wiedzieć",
+        "begrijpen": "rozumieć",
+        "verstaan": "rozumieć"
     },
-    "Planten": {
+    "planten": {
         "boom": "drzewo",
         "bloem": "kwiat",
         "gras": "trawa",
@@ -194,7 +374,7 @@
         "bloesem": "kwiatostan",
         "vrucht": "owoc"
     },
-    "Weer": {
+    "weer": {
         "zon": "słońce",
         "regen": "deszcz",
         "sneeuw": "śnieg",
@@ -205,7 +385,7 @@
         "kou": "zimno",
         "warmte": "ciepło"
     },
-    "Emoties": {
+    "emoties": {
         "blij": "szczęśliwy",
         "verdrietig": "smutny",
         "boos": "zły",
@@ -214,9 +394,34 @@
         "verliefd": "zakochany",
         "trots": "dumny",
         "jaloers": "zazdrosny",
-        "schuldig": "winny"
+        "schuldig": "winny",
+        "zin": "zmysł",
+        "plezier": "przyjemność",
+        "angst": "strach",
+        "woede": "gniew",
+        "verdriet": "smutek",
+        "blijheid": "radość",
+        "verrassing": "zaskoczenie",
+        "afkeer": "wstręt",
+        "liefde": "miłość",
+        "haat": "nienawiść",
+        "verlangen": "pragnienie",
+        "vrees": "lęk",
+        "schrik": "przerażenie",
+        "schaamte": "wstyd",
+        "jaloersheid": "zazdrość",
+        "schuld": "wina",
+        "schuldgevoel": "poczucie winy",
+        "medelijden": "współczucie",
+        "sympathie": "sympatia",
+        "antipathie": "antypatia",
+        "empathie": "empatia",
+        "compassie": "współczucie",
+        "respect": "szacunek",
+        "minachting": "pogarda",
+        "waardering": "uznanie"
     },
-    "Familie": {
+    "familie": {
         "vader": "ojciec",
         "moeder": "matka",
         "broer": "brat",
@@ -226,9 +431,25 @@
         "oom": "wujek",
         "tante": "ciocia",
         "neef": "kuzyn",
-        "nicht": "kuzynka"
+        "nicht": "kuzynka",
+        "schoonvader": "teść",
+        "schoonmoeder": "teściowa",
+        "schoonbroer": "szwagier",
+        "schoonzus": "szwagierka",
+        "zwager": "szwagier",
+        "schoonzoon": "zięć",
+        "stiefvader": "ojczym",
+        "stiefmoeder": "macocha",
+        "stiefbroer": "przyrodni brat",
+        "stiefzus": "przyrodnia siostra",
+        "halfbroer": "przyrodni brat",
+        "halfzus": "przyrodnia siostra",
+        "adoptievader": "ojciec adopcyjny",
+        "adoptie moeder": "matka adopcyjna",
+        "adoptie broer": "adoptowany brat",
+        "adoptie zus": "adoptowana siostra"
     },
-    "Kleding": {
+    "kleding": {
         "broek": "spodnie",
         "shirt": "koszula",
         "jurk": "sukienka",
@@ -239,17 +460,7 @@
         "sjaal": "szalik",
         "riem": "pasek"
     },
-    "Vervoer": {
-        "auto": "samochód",
-        "fiets": "rower",
-        "bus": "autobus",
-        "trein": "pociąg",
-        "vliegtuig": "samolot",
-        "boot": "łódź",
-        "metro": "metro",
-        "tram": "tramwaj"
-    },
-    "Beroepen": {
+    "beroepen": {
         "dokter": "lekarz",
         "leraar": "nauczyciel",
         "ingenieur": "inżynier",
@@ -260,7 +471,7 @@
         "boer": "rolnik",
         "artiest": "artysta"
     },
-    "Sporten": {
+    "sporten": {
         "voetbal": "piłka nożna",
         "basketbal": "koszykówka",
         "tennis": "tenis",
@@ -272,7 +483,7 @@
         "yoga": "joga",
         "dans": "taniec"
     },
-    "Muziek": {
+    "muziekinstrumenten": {
         "piano": "fortepian",
         "gitaar": "gitara",
         "drums": "perkusja",
@@ -281,9 +492,17 @@
         "fluit": "flet",
         "trompet": "trąbka",
         "cello": "wiolonczela",
-        "harp": "harfa"
+        "harp": "harfa",
+        "accordeon": "akordeon",
+        "klarinet": "klarnet",
+        "basgitaar": "gitara basowa",
+        "keyboard": "keyboard",
+        "orgel": "organy",
+        "banjo": "banjo",
+        "mandoline": "mandolina",
+        "synthesizer": "syntezator"
     },
-    "Kunst": {
+    "kunst": {
         "schilderij": "obraz",
         "beeldhouwwerk": "rzeźba",
         "tekening": "rysunek",
@@ -291,9 +510,9 @@
         "installatie": "instalacja",
         "performance": "performance",
         "graffiti": "graffiti",
-        "mural": "murale"
+        "beeldende kunst": "sztuki wizualne"
     },
-    "Technologie": {
+    "technologie": {
         "computer": "komputer",
         "telefoon": "telefon",
         "internet": "internet",
@@ -301,9 +520,22 @@
         "hardware": "sprzęt",
         "robot": "robot",
         "kunstmatige intelligentie": "sztuczna inteligencja",
-        "virtual reality": "wirtualna rzeczywistość"
+        "virtual reality": "wirtualna rzeczywistość",
+        "augmented reality": "rozszerzona rzeczywistość",
+        "3D-printen": "drukowanie 3D",
+        "programmeren": "programowanie",
+        "hacken": "hakowanie",
+        "cybersecurity": "cyberbezpieczeństwo",
+        "data": "dane",
+        "cloud": "chmura",
+        "netwerk": "sieć",
+        "server": "serwer",
+        "database": "baza danych",
+        "app": "aplikacja",
+        "website": "strona internetowa",
+        "social media": "media społecznościowe"
     },
-    "Natuur": {
+    "natuur": {
         "berg": "góra",
         "rivier": "rzeka",
         "bos": "las",
@@ -313,7 +545,7 @@
         "jungle": "dżungla",
         "vallei": "dolina"
     },
-    "Geluiden": {
+    "geluiden": {
         "muziek": "muzyka",
         "geluid": "dźwięk",
         "stilte": "cisza",
