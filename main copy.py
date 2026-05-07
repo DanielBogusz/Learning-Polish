@@ -1,3 +1,4 @@
+from gettext import translation
 import json
 import random
 import sys
@@ -9,16 +10,42 @@ from gtts import gTTS
 # --- FUNCTIES ---
    
 def clear_screen():
+        """Clear the console screen."""
         os.system('cls' if os.name == 'nt' else 'clear')
 
-def laad_json(bestand):
+def load_json(bestand):
     """Laadt de data uit het JSON bestand."""
     with open(bestand, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def speak_polish(text):
+def word_translate(word_input, word_category):
+        """Translate a Base language word to Translation language using the provided category dictionary."""
+        if word_input in word_category:
+            translation = word_category.get(word_input)
+            return translation
+        return ("Unknown")
+
+def category_list(cat_input, list = 'woorden.json', w: int = 20, base_language: str = "Nederlands", translation_language: str = "Pools"):
+        """Show a category in a formatted table.
+         - cat_input: The category to display.
+         - w: The column width (default is 20 characters).
+         - base_language: The name of the base language (default is "Nederlands").
+         - translation_language: The name of the translation language (default is "Pools").
+        """
+        data = load_json(list)
+        print(f"\n[{cat_input.upper()}]")
+        print(f"{base_language:^{w}}    {translation_language:^{w}}|{base_language:^{w}}    {translation_language:^{w}}")
+        print("-" * (w * 4 + 7))  # Scheidingslijn
+        for i, (nl, pl) in enumerate(data[cat_input].items()):
+            print(f"{nl:^{w}} -> {pl:^{w}}", end="|")
+            if (i + 1) % 2 == 0:  # After every 2 words, start a new line
+                print()
+        return
+
+def speak_polish(text, language: str = 'pl'):
+    """Play the given text as speech in the specified language (default is Polish)."""
     if not text: return
-    tts = gTTS(text=text, lang='pl')
+    tts = gTTS(text=text, lang=language)
     filename = "temp_audio.mp3"
     tts.save(filename)
     
@@ -60,12 +87,12 @@ def main():
 
 def zinnen_programma():
     # Inladen van de zinnen
-    zinnen = laad_json('zinnen.json')
+    zinnen = load_json('zinnen.json')
 
 def woorden_programma():
     # --- Initialisatie van het wooorden programma ---
     # Inladen van de woorden
-    data = laad_json('woorden.json')
+    data = load_json('woorden.json')
     # Maak een platte lijst van alle woorden voor de 'willekeurig' functie
     alle_woorden = {}
     for categorie in data.values():
@@ -83,27 +110,8 @@ def woorden_programma():
         print("'willekeurig' om een willekeurig woord te horen en lezen in het Pools.")
         print("'help' voor deze instructies.")
         print("'stop' om het programma te verlaten.")
+          
 
-    def woorden(word_input, word_category):
-            if word_input in word_category:
-                vertaling = word_category.get(word_input)
-                print(f"'{word_input}' is in het Pools: {vertaling}")
-                speak_polish(vertaling)
-            else:
-                print("Dat woord ken ik niet. bekijk de lijst om te zien wat ik weet.")
-            return
-    
-    def category_list(cat_input):
-            # Instellingen voor het vakje
-            w = 20  # Breedte van elk vakje
-            print(f"\n[{cat_input.upper()}]")
-            print(f"{'Nederlands':^{w}}    {'Pools':^{w}}|{'Nederlands':^{w}}    {'Pools':^{w}}")
-            print("-" * 100)  # Scheidingslijn
-            for i, (nl, pl) in enumerate(data[cat_input].items()):
-                print(f"{nl:^{w}} -> {pl:^{w}}", end="|")
-                if i % 2 == 0:  # Na elke 2 woorden een nieuwe regel
-                    print()
-            return
     
     # print(f"Categorieën beschikbaar: {', '.join(data.keys())}")
 
@@ -155,7 +163,9 @@ def woorden_programma():
                     clear_screen()
                     category_list(cat_input)
                 elif word_input in data[cat_input]:
-                    woorden(word_input, data[cat_input])
+                    vertaling = word_translate(word_input, data[cat_input])
+                    print(f"'{word_input}' is in het Pools: {vertaling}")
+                    speak_polish(vertaling)
                     input("Druk op Enter om door te gaan.")
             else:
                 print("Ongeldige categorie. Probeer het opnieuw.")
