@@ -1,254 +1,308 @@
-from gettext import translation
 import json
 import random
-import sys
-import pygame
-import time
 import os
+import time
+import sys
+from typing import Optional, Any
+
+import pygame
 from gtts import gTTS
 from rich.console import Console
 from rich.table import Table
 from rich import box
+import rich
 
-# --- FUNCTIES ---
-   
-def clear_screen():
-        """Clear the console screen."""
-        os.system('cls' if os.name == 'nt' else 'clear')
+# --- GLOBALE CONFIGURATIE ---
+console = Console()
 
-def load_json(bestand):
-    """Laadt de data uit het JSON bestand."""
-    with open(bestand, 'r', encoding='utf-8') as f:
-        return json.load(f)
+# --- HULPFUNCTIES ---
 
-def word_translate(word_input, word_category):
-        """Translate a Base language word to Translation language using the provided category dictionary."""
-        if word_input in word_category:
-            translation = word_category.get(word_input)
-            return translation
-        return ("Unknown")
+def clear_screen() -> None:
+    """Wist de console output op basis van het besturingssysteem."""
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-def category_list(cat_input, list = 'woorden.json', w: int = 20, base_language: str = "Nederlands", translation_language: str = "Pools"):
-        """Show a category in a formatted table.
-         - cat_input: The category to display.
-         - w: The column width (default is 20 characters).
-         - base_language: The name of the base language (default is "Nederlands").
-         - translation_language: The name of the translation language (default is "Pools").
-        """
-        data = load_json(list)
-        print(f"\n[{cat_input.upper()}]")
-        print(f"{base_language:^{w}}    {translation_language:^{w}}|{base_language:^{w}}    {translation_language:^{w}}")
-        print("-" * (w * 4 + 7))  # Scheidingslijn
-        for i, (nl, pl) in enumerate(data[cat_input].items()):
-            print(f"{nl:^{w}} -> {pl:^{w}}", end="|")
-            if (i + 1) % 2 == 0:  # After every 2 words, start a new line
-                print()
-        return
-
-def category_listR(cat_input, list_file='woorden.json', num_columns: int = 2, base_language: str = "Nederlands", translation_language: str = "Pools"):
+def load_json(bestand: str) -> dict[str, Any]:
     """
-    Toont een categorie in een prachtig opgemaakte tabel met Rich.
-    - num_columns: Hoeveel woordenparen er naast elkaar moeten staan.
-    """
-    console = Console()
+    Laadt data uit een JSON-bestand met foutafhandeling.
     
-    # Data laden (ervan uitgaande dat load_json elders is gedefinieerd)
+    Args:
+        bestand: Pad naar het JSON-bestand.
+        
+    Returns:
+        De ingeladen dictionary.
+    """
     try:
-        with open(list_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        with open(bestand, 'r', encoding='utf-8') as f:
+            return json.load(f)
     except FileNotFoundError:
-        console.print(f"[bold red]Fout:[/bold red] Bestand {list_file} niet gevonden.")
-        return
+        console.print(f"[bold red]Fout:[/bold red] Bestand '{bestand}' niet gevonden.")
+        return {}
+    except json.JSONDecodeError:
+        console.print(f"[bold red]Fout:[/bold red] Bestand '{bestand}' bevat ongeldige JSON.")
+        return {}
 
-    if cat_input not in data:
-        console.print(f"[bold yellow]Waarschuwing:[/bold yellow] Categorie '{cat_input}' niet gevonden.")
-        return
-
-    # Maak de tabel aan
-    table = Table(title=f"\n[bold blue]{cat_input.upper()}[/bold blue]", box=box.ROUNDED)
-
-    # Voeg kolommen toe op basis van het gewenste aantal paren
-    # We voegen per paar twee kolommen toe (Bron en Vertaling)
-    for i in range(num_columns):
-        table.add_column(base_language, style="cyan", justify="center")
-        table.add_column(translation_language, style="magenta", justify="center")
-
-    # Verzamel de items uit de json
-    items = list(data[cat_input].items())
+def speak_polish(text: str, language: str = 'pl') -> None:
+    """
+    Zet tekst om naar spraak en speelt deze af via Pygame.
     
-    # Verdeel de items in rijen op basis van num_columns
+    Args:
+        text: De tekst die uitgesproken moet worden.
+        language: De taalcode (standaard 'pl' voor Pools).
+    """
+    if not text:
+        return
+        
+    try:
+        tts = gTTS(text=text, lang=language)
+        filename = "temp_audio.mp3"
+        tts.save(filename)
+        
+        if not pygame.mixer.get_init():
+            pygame.mixer.init()
+            
+        pygame.mixer.music.load(filename)
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            time.sleep(0.1)
+        pygame.mixer.music.unload()
+    except Exception as e:
+        console.print(f"[dim red]Audio fout: {e}[/dim red]")
+
+def word_translate(word_input: str, word_category: dict[str, str]) -> str:
+    """
+    Vertaalt een woord op basis van een specifieke categorie-lijst.
+    
+    Returns:
+        De vertaling of "Unknown" als het woord niet bestaat.
+    """
+    return word_category.get(word_input, "Unknown")
+
+# --- RICH TABEL FUNCTIES ---
+
+def display_categories_tableR(data: dict[str, dict[str, str]]) -> None:
+    """Toont categorieën in kolommen met een veiligheidsmarge tegen buiten het scherm vallen."""
+    if not data:
+        return
+
+    # 1. Bereken de breedte van de langste naam
+    # We voegen een extra marge toe voor padding en de randen van de tabel
+    max_label_len = max(len(cat) for cat in data.keys())
+    col_width = max(12, max_label_len + 2) 
+    
+    # Een kolom-set (Nr + Categorie + Items) + tabelranden en witruimte
+    # We rekenen nu met 5 tekens extra marge per kolomgroep
+    full_col_set_width = 4 + col_width + 6 + 5
+    
+    term_width = console.width
+    # Bereken het aantal kolommen dat ÉCHT past
+    num_columns = max(1, term_width // full_col_set_width)
+    
+    table = Table(
+        title="[bold green]Beschikbare Categorieën[/bold green]", 
+        box=box.ROUNDED, 
+        expand=False,  # We zetten expand op False om 'overflow' te voorkomen
+        show_lines=False
+    )
+    
+    # 2. Voeg de kolommen toe met 'no_wrap' om te voorkomen dat ze de layout breken
+    for i in range(num_columns):
+        table.add_column("Nr.", justify="right", style="dim", width=4, no_wrap=True)
+        table.add_column("Categorie", style="yellow", width=col_width, no_wrap=True)
+        table.add_column("Items", justify="center", style="cyan", width=6, no_wrap=True)
+
+    items = list(data.items())
+    
+    # 3. Vul de rijen
     for i in range(0, len(items), num_columns):
         row_data = []
-        # Pak een 'slice' van de data voor deze rij
-        current_chunk = items[i : i + num_columns]
+        chunk = items[i : i + num_columns]
+        for idx, (cat, woorden) in enumerate(chunk, i + 1):
+            # We maken de naam netjes passend
+            display_name = cat.capitalize()
+            row_data.extend([str(idx), display_name, str(len(woorden))])
         
-        for nl, pl in current_chunk:
-            row_data.extend([nl, pl])
-            
-        # Als de laatste rij niet vol is, vul aan met lege strings
-        while len(row_data) < num_columns * 2:
-            row_data.extend(["", ""])
-            
+        # Vul lege cellen op voor de laatste rij
+        while len(row_data) < num_columns * 3:
+            row_data.extend(["", "", ""])
         table.add_row(*row_data)
 
     console.print(table)
 
-# Voorbeeld van gebruik:
-# category_listR("Fruit", num_columns=3)
+def category_listR(
+    cat_input: str, 
+    data: dict[str, dict[str, str]], 
+    base_lang: str = "Nederlands", 
+    trans_lang: str = "Pools"
+) -> None:
+    """Toont woorden in een tabel aangepast aan het langste woord in de categorie."""
+    if cat_input not in data:
+        console.print(f"[bold yellow]Waarschuwing:[/bold yellow] Categorie '{cat_input}' niet gevonden.")
+        return
 
-def speak_polish(text, language: str = 'pl'):
-    """Play the given text as speech in the specified language (default is Polish)."""
-    if not text: return
-    tts = gTTS(text=text, lang=language)
-    filename = "temp_audio.mp3"
-    tts.save(filename)
+    woorden_dict = data[cat_input]
+    # Bereken breedte op basis van langste NL en PL woord
+    max_nl = max((len(nl) for nl in woorden_dict.keys()), default=10)
+    max_pl = max((len(pl) for pl in woorden_dict.values()), default=10)
     
-    if not pygame.mixer.get_init():
-        pygame.mixer.init()
-        
-    pygame.mixer.music.load(filename)
-    pygame.mixer.music.play()
-    while pygame.mixer.music.get_busy():
-        time.sleep(0.1)
-    pygame.mixer.music.unload()
+    # Totale breedte van één paar: NL + PL + borders
+    pair_width = max_nl + max_pl + 5
+    num_pairs = max(1, console.width // pair_width)
 
-# --- MAIN PROGRAM ---
+    table = Table(title=f"\n[bold blue]{cat_input.upper()}[/bold blue]", box=box.ROUNDED, expand=True)
 
-def main():
-    while True:
-        try:
-            # Je bestaande code hier, bijvoorbeeld:
-            clear_screen()
-            print("--- Poolse Leerhulp ---")
-            print("1) Woorden leren")
-            print("2) Zinnen leren")
-            print("S) Stoppen")
-            keuze = input("Kies een optie (1 of 2): ").strip()
-            if keuze == '1':
-                woorden_programma()
-            elif keuze == '2':
-                zinnen_programma()
-            elif keuze == 'S' or keuze == 's':
-                print("Programma gestopt.")
-                break
-            else:
-                print("Ongeldige keuze. Start het programma opnieuw.")
-        # ... rest van je logica ...
-        
-        except KeyboardInterrupt:
-            print("\nKeyboardInterrupt gedetecteerd.")
-            # sys.exit(0)
+    for _ in range(num_pairs):
+        table.add_column(base_lang, style="cyan", justify="center", min_width=max_nl)
+        table.add_column(trans_lang, style="magenta", justify="center", min_width=max_pl)
 
-def zinnen_programma():
-    # Inladen van de zinnen
-    zinnen = load_json('zinnen.json')
+    items = list(woorden_dict.items())
+    for i in range(0, len(items), num_pairs):
+        row_data = []
+        chunk = items[i : i + num_pairs]
+        for nl, pl in chunk:
+            row_data.extend([nl, pl])
+        while len(row_data) < num_pairs * 2:
+            row_data.extend(["", ""])
+        table.add_row(*row_data)
 
-def woorden_programma():
-    # --- Initialisatie van het wooorden programma ---
-    # Inladen van de woorden
+    console.print(table)
+
+# --- PROGRAMMA ONDERDELEN ---
+
+def toon_woorden_help() -> None:
+    """Toont de help-instructies voor de woorden-module."""
+    rich.print("\n[bold]Opties voor woorden leren:[/bold]")
+    options = {
+        "woorden": "Vertaal een woord en hoor de uitspraak.",
+        "categorieën": "Bekijk alle beschikbare thema's.",
+        "categorie": "Leer woorden binnen een specifiek thema.",
+        "willekeurig": "Krijg een willekeurig Pools woord.",
+        "stop": "Terug naar het hoofdmenu."
+    }
+    for cmd, desc in options.items():
+        rich.print(f"  [yellow]{cmd:12}[/yellow] : {desc}")
+
+def woorden_programma() -> None:
+    """Hoofd-onderdeel voor het leren van losse woorden."""
     data = load_json('woorden.json')
-    # Maak een platte lijst van alle woorden voor de 'willekeurig' functie
-    alle_woorden = {}
-    for categorie in data.values():
-        alle_woorden.update(categorie)
+    if not data: return
 
-    # --- Functies binnen het woorden programma ---
-    # Instructies:
-    def help():
-        print("\n--- Woorden leren ---")
-        print("Welkom bij de Poolse woorden leerhulp!")
-        print("Wat wil je doen? de volgende opties zijn beschikbaar:")
-        print("'woorden' om een woord te vertalen en te horen.")
-        print("'categorieën' om de beschikbare categorieën te zien.")
-        print("'categorie' om woorden van een specifieke categorie te leren.")
-        print("'willekeurig' om een willekeurig woord te horen en lezen in het Pools.")
-        print("'help' voor deze instructies.")
-        print("'stop' om het programma te verlaten.")
-          
+    # Maak een lijst van categorienamen voor nummer-selectie
+    categorielijst = list(data.keys())
 
-    
-    # print(f"Categorieën beschikbaar: {', '.join(data.keys())}")
+    alle_woorden: dict[str, str] = {}
+    for cat_data in data.values():
+        alle_woorden.update(cat_data)
 
-    # --- Hoofd loop van het woorden programma ---
     while True:
         clear_screen()
-        help()
+        console.print("[bold cyan]--- Woorden Leren ---[/bold cyan]")
+        toon_woorden_help()
+        
         user_input = input("\nInvoer: ").strip().lower()
 
         if user_input == 'stop':
-            print("Do widzenia!")
             speak_polish("Do widzenia")
             break
 
-        elif user_input == 'lijst':
+        elif user_input in ['categorieën', 'categorieen']:
             clear_screen()
-            for cat, woorden in data.items():
-                print(f"\n[{cat.upper()}]")
-                for nl, pl in woorden.items():
-                    print(f"  {nl} -> {pl}")
+            display_categories_tableR(data)
             input("\nDruk op Enter om terug te gaan.")
-            continue
 
+        elif user_input == 'categorie':
+            clear_screen()
+            display_categories_tableR(data)
+            cat_choice = input("\nKies een nummer of typ de naam van de categorie: ").strip().lower()
+            
+            actual_cat = None
+
+            # Check of de gebruiker een nummer heeft ingevoerd
+            if cat_choice.isdigit():
+                index = int(cat_choice) - 1  # -1 omdat we bij 1 beginnen te tellen in de tabel
+                if 0 <= index < len(categorielijst):
+                    actual_cat = categorielijst[index]
+            else:
+                # Zoek op naam (case insensitive) als het geen nummer is
+                actual_cat = next((k for k in data if k.lower() == cat_choice), None)
+            
+            if actual_cat:
+                while True:
+                    clear_screen()
+                    category_listR(actual_cat, data)
+                    word_in = input("\nWelk woord wil je horen? (of 'stop'): ").strip().lower()
+                    if word_in == 'stop': break
+                    
+                    if word_in in data[actual_cat]:
+                        vertaling = word_translate(word_in, data[actual_cat])
+                        rich.print(f"[bold green]{word_in}[/bold green] -> [bold magenta]{vertaling}[/bold magenta]")
+                        speak_polish(vertaling)
+                        input("Druk op Enter...")
+            else:
+                rich.print("[red]Ongeldige keuze. Voer een nummer uit de tabel in of de exacte naam.[/red]")
+                time.sleep(1.5)
+
+        # ... rest van de elif blokken (willekeurig, woorden) blijven hetzelfde ...
         elif user_input == 'willekeurig':
             while True:
                 clear_screen()
                 nl, pl = random.choice(list(alle_woorden.items()))
-                print(f"Willekeurig: {nl} -> {pl}")
+                rich.print(f"\n[bold yellow]Willekeurig:[/bold yellow] {nl} -> [bold cyan]{pl}[/bold cyan]")
                 speak_polish(pl)
-                user_choice = input("Druk op Enter om door te gaan. (Of typ 'stop' om terug te gaan.)\n").strip().lower()
-                if user_choice == 'stop':
+                if input("\nEnter voor volgende, 'stop' om te stoppen: ").lower() == 'stop':
                     break
-
-        elif user_input == 'categorieën' or user_input == 'categorieen':
-            print(f"Categorieën: {', '.join(data.keys())}")
-            continue
-
-        elif user_input == 'categorie':
-            clear_screen()
-            print(f"Beschikbare categorieën:\n {', '.join(data.keys())}")
-            cat_input = input("Welke categorie wil je zien? : ").strip().lower()
-            while cat_input in data:
-                clear_screen()
-                # before: category_list(cat_input)
-                category_listR(cat_input, num_columns=2)
-                word_input = input("\nWelk woord wil je uit deze categorie horen? (of 'stop' om terug te gaan) : ").strip().lower()
-                if word_input == 'stop':
-                    break
-                elif word_input == 'lijst':
-                    clear_screen()
-                    category_listR(cat_input, num_columns=2)
-                elif word_input in data[cat_input]:
-                    vertaling = word_translate(word_input, data[cat_input])
-                    print(f"'{word_input}' is in het Pools: {vertaling}")
-                    speak_polish(vertaling)
-                    input("Druk op Enter om door te gaan.")
-            else:
-                print("Ongeldige categorie. Probeer het opnieuw.")
-                input("Druk op Enter om terug te gaan.")    
-            continue
-
-        elif user_input == 'help':
-            help()
-            continue
 
         elif user_input == 'woorden':
             while True:
                 clear_screen()
-                print("Typ een Nederlands woord om de Poolse vertaling te horen.")
-                # Zoek het woord in de grote lijst
-                word_input = input("\nWelk woord? : ").strip().lower()
-                vertaling = word_translate(word_input, alle_woorden)
-                print(f"'{word_input}' is in het Pools: {vertaling}")
+                word_in = input("Typ Nederlands woord (of 'stop'): ").strip().lower()
+                if word_in == 'stop': break
+                vertaling = word_translate(word_in, alle_woorden)
+                rich.print(f"'{word_in}' is in het Pools: [bold cyan]{vertaling}[/bold cyan]")
                 speak_polish(vertaling)
-                another_word = input("Wil je nog een woord vertalen? (ja/nee) ").strip().lower()
-                if another_word == 'ja':
-                    continue
-                else:
-                    break
-        
-        else:
-            print("Ongeldige invoer. Typ 'help' voor de opties.")
-            continue
-        
+                input("\nVolgende...")
+
+def zinnen_programma() -> None:
+    """Hoofd-onderdeel voor het leren van zinnen."""
+    zinnen = load_json('zinnen.json')
+    rich.print("[yellow]Zinnen module is in ontwikkeling...[/yellow]")
+    time.sleep(1.5)
+
+# --- MAIN ENTRY POINT ---
+
+def main() -> None:
+    """De start-functie met extra crash-beveiliging."""
+    try:
+        # Start het programma
+        while True:
+            clear_screen()
+            console.print("[bold blue]=== Poolse Leerhulp 2026 ===[/bold blue]", justify="center")
+            rich.print("\n1) [bold]Woorden[/bold] leren")
+            rich.print("2) [bold]Zinnen[/bold] leren")
+            rich.print("S) [bold red]Stoppen[/bold red]")
+            
+            keuze = input("\nKies een optie: ").strip().lower()
+            
+            if keuze == '1':
+                woorden_programma()
+            elif keuze == '2':
+                zinnen_programma()
+            elif keuze == 's':
+                break
+            elif not keuze:
+                continue
+            else:
+                rich.print("[red]Ongeldige keuze.[/red]")
+                time.sleep(1)
+
+    except Exception as e:
+        # DIT IS CRUCIAAL: Het houdt de foutmelding op je scherm!
+        clear_screen()
+        console.print("\n[bold white on red] HET PROGRAMMA IS GECRASHT! [/bold white on red]")
+        console.print(f"\n[bold red]Foutmelding:[/bold red] {e}")
+        console.print("\n[yellow]Details voor debugging:[/yellow]")
+        import traceback
+        console.print(traceback.format_exc())
+        input("\nDruk op Enter om de terminal te sluiten...")
+
 if __name__ == "__main__":
     main()
