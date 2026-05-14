@@ -80,51 +80,53 @@ def word_translate(word_input: str, word_category: dict[str, str]) -> str:
 # --- RICH TABEL FUNCTIES ---
 
 def display_categories_tableR(data: dict[str, dict[str, str]]) -> None:
-    """Toont categorieën in kolommen met een veiligheidsmarge tegen buiten het scherm vallen."""
+    """Toont categorieën in compacte kolommen zonder onnodige witruimte."""
     if not data:
         return
 
-    # 1. Bereken de breedte van de langste naam
-    # We voegen een extra marge toe voor padding en de randen van de tabel
+    # 1. Bepaal de breedte op basis van de langste naam
     max_label_len = max(len(cat) for cat in data.keys())
-    col_width = max(12, max_label_len + 2) 
+    # We geven de kolom precies genoeg ruimte, maar niet meer dan dat
+    label_width = max(10, max_label_len + 2) 
     
-    # Een kolom-set (Nr + Categorie + Items) + tabelranden en witruimte
-    # We rekenen nu met 5 tekens extra marge per kolomgroep
-    full_col_set_width = 4 + col_width + 6 + 5
+    # Bereken hoeveel sets er op het scherm passen
+    # (Nr: 4, Categorie: label_width, Items: 6) + marges
+    full_col_set_width = 4 + label_width + 6 + 4
     
     term_width = console.width
-    # Bereken het aantal kolommen dat ÉCHT past
     num_columns = max(1, term_width // full_col_set_width)
     
+    # Beperk het aantal kolommen tot het aantal items (voor als je er maar 2 hebt)
+    num_columns = min(num_columns, len(data))
+
+    # CRUCIAL: expand=False zorgt dat de tabel niet breder wordt dan de kolommen
     table = Table(
         title="[bold green]Beschikbare Categorieën[/bold green]", 
         box=box.ROUNDED, 
-        expand=False,  # We zetten expand op False om 'overflow' te voorkomen
-        show_lines=False
+        expand=False, 
+        padding=(0, 1)
     )
     
-    # 2. Voeg de kolommen toe met 'no_wrap' om te voorkomen dat ze de layout breken
-    for i in range(num_columns):
-        table.add_column("Nr.", justify="right", style="dim", width=4, no_wrap=True)
-        table.add_column("Categorie", style="yellow", width=col_width, no_wrap=True)
-        table.add_column("Items", justify="center", style="cyan", width=6, no_wrap=True)
+    # 2. Kolommen toevoegen
+    for _ in range(num_columns):
+        table.add_column("Nr.", justify="right", style="dim", width=4)
+        table.add_column("Categorie", style="yellow", width=label_width)
+        table.add_column("Items", justify="center", style="cyan", width=6)
 
     items = list(data.items())
     
-    # 3. Vul de rijen
+    # 3. Rijen vullen
     for i in range(0, len(items), num_columns):
         row_data = []
         chunk = items[i : i + num_columns]
         for idx, (cat, woorden) in enumerate(chunk, i + 1):
-            # We maken de naam netjes passend
-            display_name = cat.capitalize()
-            row_data.extend([str(idx), display_name, str(len(woorden))])
+            row_data.extend([str(idx), cat.capitalize(), str(len(woorden))])
         
-        # Vul lege cellen op voor de laatste rij
-        while len(row_data) < num_columns * 3:
-            row_data.extend(["", "", ""])
-        table.add_row(*row_data)
+        # Alleen rijen toevoegen die echt data bevatten
+        if row_data:
+            while len(row_data) < num_columns * 3:
+                row_data.extend(["", "", ""])
+            table.add_row(*row_data)
 
     console.print(table)
 
@@ -134,34 +136,36 @@ def category_listR(
     base_lang: str = "Nederlands", 
     trans_lang: str = "Pools"
 ) -> None:
-    """Toont woorden in een tabel aangepast aan het langste woord in de categorie."""
+    """Toont genummerde woorden/zinnen in een tabel, links uitgelijnd."""
     if cat_input not in data:
         console.print(f"[bold yellow]Waarschuwing:[/bold yellow] Categorie '{cat_input}' niet gevonden.")
         return
 
-    woorden_dict = data[cat_input]
-    # Bereken breedte op basis van langste NL en PL woord
-    max_nl = max((len(nl) for nl in woorden_dict.keys()), default=10)
-    max_pl = max((len(pl) for pl in woorden_dict.values()), default=10)
+    items = list(data[cat_input].items())
     
-    # Totale breedte van één paar: NL + PL + borders
-    pair_width = max_nl + max_pl + 5
+    # Bereken breedtes (rekening houdend met het nummer "99. ")
+    max_nl = max((len(nl) for nl, _ in items), default=10) + 4
+    max_pl = max((len(pl) for _, pl in items), default=10)
+    
+    pair_width = max_nl + max_pl + 6
     num_pairs = max(1, console.width // pair_width)
 
-    table = Table(title=f"\n[bold blue]{cat_input.upper()}[/bold blue]", box=box.ROUNDED, expand=True)
+    table = Table(title=f"\n[bold blue]{cat_input.upper()}[/bold blue]", box=box.ROUNDED, expand=False)
 
     for _ in range(num_pairs):
-        table.add_column(base_lang, style="cyan", justify="center", min_width=max_nl)
-        table.add_column(trans_lang, style="magenta", justify="center", min_width=max_pl)
+        table.add_column("Nr.", style="dim", justify="right", width=3)
+        table.add_column(base_lang, style="cyan", justify="left", min_width=max_nl - 4)
+        table.add_column(trans_lang, style="magenta", justify="left", min_width=max_pl)
 
-    items = list(woorden_dict.items())
+    # Vul de rijen
     for i in range(0, len(items), num_pairs):
         row_data = []
         chunk = items[i : i + num_pairs]
-        for nl, pl in chunk:
-            row_data.extend([nl, pl])
-        while len(row_data) < num_pairs * 2:
-            row_data.extend(["", ""])
+        for idx, (nl, pl) in enumerate(chunk, i + 1):
+            row_data.extend([str(idx), nl, pl])
+        
+        while len(row_data) < num_pairs * 3:
+            row_data.extend(["", "", ""])
         table.add_row(*row_data)
 
     console.print(table)
@@ -262,10 +266,65 @@ def woorden_programma() -> None:
                 input("\nVolgende...")
 
 def zinnen_programma() -> None:
-    """Hoofd-onderdeel voor het leren van zinnen."""
-    zinnen = load_json('zinnen.json')
-    rich.print("[yellow]Zinnen module is in ontwikkeling...[/yellow]")
-    time.sleep(1.5)
+    """Onderdeel voor het leren van zinnen met nummer- en tekstzoekfunctie."""
+    data = load_json('zinnen.json')
+    if not data: return
+
+    categorielijst = list(data.keys())
+
+    while True:
+        clear_screen()
+        console.print("[bold magenta]--- Zinnen Leren ---[/bold magenta]")
+        display_categories_tableR(data)
+        
+        cat_choice = input("\nKies categorie (nummer/naam) of 'stop': ").strip().lower()
+        if cat_choice == 'stop': break
+
+        actual_cat = None
+        if cat_choice.isdigit():
+            idx = int(cat_choice) - 1
+            if 0 <= idx < len(categorielijst):
+                actual_cat = categorielijst[idx]
+        else:
+            actual_cat = next((k for k in data if k.lower() == cat_choice), None)
+
+        if actual_cat:
+            zinnen_in_cat = list(data[actual_cat].items()) # Lijst van (NL, PL) tuples
+            
+            while True:
+                clear_screen()
+                category_listR(actual_cat, data)
+                
+                query = input("\nKies een nummer of typ een deel van de zin (of 'stop'): ").strip().lower()
+                if query == 'stop': break
+                if not query: continue
+
+                gevonden_nl, gevonden_pl = None, None
+
+                # 1. Zoeken op nummer
+                if query.isdigit():
+                    zins_index = int(query) - 1
+                    if 0 <= zins_index < len(zinnen_in_cat):
+                        gevonden_nl, gevonden_pl = zinnen_in_cat[zins_index]
+                
+                # 2. Zoeken op tekst (als er nog geen nummer-match was)
+                if not gevonden_nl:
+                    for nl, pl in zinnen_in_cat:
+                        if query in nl.lower():
+                            gevonden_nl, gevonden_pl = nl, pl
+                            break
+
+                if gevonden_nl:
+                    rich.print(f"\n[bold green]Geselecteerd:[/bold green]")
+                    rich.print(f"[cyan]{gevonden_nl}[/cyan] -> [bold magenta]{gevonden_pl}[/bold magenta]\n")
+                    speak_polish(gevonden_pl)
+                    input("Druk op Enter...")
+                else:
+                    rich.print("[red]Geen match gevonden voor deze invoer.[/red]")
+                    time.sleep(1.2)
+        else:
+            rich.print("[red]Categorie niet gevonden.[/red]")
+            time.sleep(1)
 
 # --- MAIN ENTRY POINT ---
 
